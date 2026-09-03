@@ -100,9 +100,9 @@ Risk levels:
 
 | Score | Risk Level | Decision |
 |------:|------------|----------|
-| 0–29 | Low | APPROVE |
-| 30–59 | Medium | REVIEW |
-| 60–84 | High | HOLD |
+| 0–34 | Low | APPROVE |
+| 35–74 | Medium | REVIEW |
+| 75–84 | High | HOLD |
 | 85–100 | Critical | BLOCK |
 
 This makes the fraud decision explainable instead of relying on an opaque binary prediction.
@@ -495,6 +495,13 @@ The backend normally runs on:
 http://localhost:5000
 ```
 
+To run the backend fraud-engine tests:
+
+```text
+cd backend
+npm test
+```
+
 ---
 
 ## 4. Start the frontend
@@ -679,6 +686,8 @@ AegisPay/
 ├── backend/
 │   ├── models/
 │   │   └── Payment.js
+│   ├── test/
+│   │   └── fraudEngine.test.js
 │   ├── externalFraudAI.js
 │   ├── fraudEngine.js
 │   ├── server.js

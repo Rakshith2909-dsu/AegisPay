@@ -722,6 +722,7 @@ body{
   .page-content{padding:20px}
   .notice{margin-left:20px;margin-right:20px}
   .page-header{padding:20px}
+  .time-machine-grid{grid-template-columns:1fr}
 }
 @media(max-width:640px){
   .topbar{min-height:68px}
@@ -731,6 +732,7 @@ body{
   .page-header h2{font-size:23px}
   .notice{margin:12px 15px 0}
   .trend-chart-wrap{height:245px}
+  .time-machine-empty{padding:48px 16px}
 }
 
 

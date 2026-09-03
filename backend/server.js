@@ -1610,6 +1610,21 @@ app.post(
         },
       });
     } catch (error) {
+      if (error?.code === 11000 && idempotencyKey) {
+        const existingPayment = await Payment.findOne({ idempotencyKey });
+
+        if (existingPayment) {
+          return res.status(200).json({
+            success: true,
+            idempotent: true,
+            message: "Existing payment returned for this idempotency key",
+            data: {
+              payment: paymentSnapshot(existingPayment),
+            },
+          });
+        }
+      }
+
       console.error(
         "POST /api/payments:",
         error

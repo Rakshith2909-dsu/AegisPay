@@ -208,6 +208,13 @@ export default function App() {
 
       setActivity(activityResponse.data || []);
       setRealtimeStatus("connected");
+
+      if (
+        allowStartupRetry &&
+        paymentsResponse.data?.transactions?.length === 0
+      ) {
+        window.setTimeout(() => loadAll(false, false), 1200);
+      }
     } catch (error) {
       console.error(error);
 

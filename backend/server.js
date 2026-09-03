@@ -2580,6 +2580,84 @@ app.post(
 );
 
 /* =========================================================
+   FAILURE AND WEBHOOK SIMULATORS
+========================================================= */
+
+app.post("/api/payments/:id/simulate", async (req, res) => {
+  try {
+    const payment = await Payment.findOne({ id: req.params.id });
+    const scenario = String(req.body?.scenario || "").toLowerCase();
+
+    if (!payment) {
+      return res.status(404).json({ success: false, message: "Payment not found" });
+    }
+
+    if (!["timeout", "recovery_failure"].includes(scenario)) {
+      return res.status(400).json({ success: false, message: "Unsupported simulation scenario" });
+    }
+
+    if (scenario === "timeout") {
+      payment.status = "pending";
+      payment.transferred = false;
+      payment.transferStatus = "Awaiting bank response";
+      payment.failureReason = "Simulated bank timeout";
+      addHistory(payment, "PAYMENT_TIMEOUT", "Bank response timed out; payment is safe to retry with the same idempotency key", "Failure Simulator");
+      broadcastEvent("PAYMENT_TIMEOUT", paymentSnapshot(payment));
+    }
+
+    if (scenario === "recovery_failure") {
+      payment.recoveryAttempts = Number(payment.recoveryAttempts || 0) + 1;
+      payment.recoveryEligible = true;
+      payment.recoveryStatus = "Retry Required";
+      payment.failureReason = "Simulated recovery route failure";
+      payment.status = "held";
+      payment.incidentCreated = true;
+      payment.incidentStatus = "open";
+      payment.recoveryHistory.push({
+        attemptedAt: new Date(),
+        route: payment.route || "Recovery Payment Route",
+        status: "failed",
+        message: "Simulated recovery failure; operator retry required",
+      });
+      addHistory(payment, "RECOVERY_FAILED", "Recovery route failed; incident remains open for retry", "Failure Simulator");
+      broadcastEvent("PAYMENT_RECOVERY_FAILED", paymentSnapshot(payment));
+    }
+
+    await payment.save();
+    res.json({ success: true, message: `Simulation completed: ${scenario}`, data: paymentSnapshot(payment) });
+  } catch (error) {
+    console.error("POST /api/payments/:id/simulate:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.post("/api/webhooks/simulate", async (req, res) => {
+  try {
+    const { paymentId, eventType } = req.body || {};
+    const payment = await Payment.findOne({ id: paymentId });
+    const allowedEvents = ["payment.authorized", "payment.failed", "payment.captured", "refund.processed"];
+
+    if (!payment) {
+      return res.status(404).json({ success: false, message: "Payment not found" });
+    }
+
+    if (!allowedEvents.includes(eventType)) {
+      return res.status(400).json({ success: false, message: "Unsupported webhook event" });
+    }
+
+    addHistory(payment, "WEBHOOK_RECEIVED", `Simulated webhook received: ${eventType}`, "Webhook Simulator");
+    await payment.save();
+    const snapshot = paymentSnapshot(payment);
+    broadcastEvent("WEBHOOK_RECEIVED", { paymentId, eventType, payment: snapshot });
+
+    res.json({ success: true, message: `Webhook simulated: ${eventType}`, data: snapshot });
+  } catch (error) {
+    console.error("POST /api/webhooks/simulate:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/* =========================================================
    DELETE
 ========================================================= */
 

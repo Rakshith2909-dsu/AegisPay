@@ -363,9 +363,13 @@ POST /api/payments/:id/approve
 POST /api/payments/:id/block
 POST /api/payments/:id/recover
 GET  /api/payments/:id/time-machine
+POST /api/payments/:id/simulate
+POST /api/webhooks/simulate
 ```
 
 `POST /api/payments` accepts an optional `Idempotency-Key` header. Reusing the same key returns the original payment instead of creating a duplicate.
+
+The simulator endpoints support `timeout` and `recovery_failure` scenarios, plus webhook events such as `payment.authorized`, `payment.failed`, `payment.captured` and `refund.processed`. Each simulation is recorded in payment history and broadcast through SSE.
 
 ### Operational Data
 

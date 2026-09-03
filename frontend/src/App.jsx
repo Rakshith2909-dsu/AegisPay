@@ -272,6 +272,39 @@ export default function App() {
     }
   }
 
+  async function simulateScenario(scenario) {
+    if (!timeMachinePayment) return;
+
+    try {
+      const response = await request(`/payments/${timeMachinePayment}/simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario }),
+      });
+      setNotice(response.message);
+      await loadAll(false);
+      await runTimeMachine(timeMachinePayment);
+    } catch (error) {
+      setNotice(error.message);
+    }
+  }
+
+  async function simulateWebhook(eventType) {
+    if (!timeMachinePayment) return;
+
+    try {
+      const response = await request("/webhooks/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentId: timeMachinePayment, eventType }),
+      });
+      setNotice(response.message);
+      await runTimeMachine(timeMachinePayment);
+    } catch (error) {
+      setNotice(error.message);
+    }
+  }
+
   /* =========================================================
      INITIAL LOAD
      ========================================================= */
@@ -953,6 +986,8 @@ export default function App() {
               loading={timeMachineLoading}
               onSelect={setTimeMachinePayment}
               onRun={runTimeMachine}
+              onSimulate={simulateScenario}
+              onWebhook={simulateWebhook}
             />
           )}
 
@@ -1094,6 +1129,8 @@ function PaymentTimeMachine({
   loading,
   onSelect,
   onRun,
+  onSimulate,
+  onWebhook,
 }) {
   return (
     <>
@@ -1149,8 +1186,18 @@ function PaymentTimeMachine({
             <section className="panel">
               <PanelTitle eyebrow="RESILIENCE LAB" title="Failure containment" icon={<ShieldCheck size={19} />} />
               <div className="scenario-list">{data.failureScenarios.map((scenario) => <div className="scenario-item" key={scenario.name}><div><strong>{scenario.name}</strong><p>{scenario.result}</p></div><span className={`status-pill ${scenario.severity}`}>{scenario.control}</span></div>)}</div>
+              <div className="simulator-actions">
+                <button className="secondary-button" onClick={() => onSimulate("timeout")}><RefreshCw size={15} /> Simulate timeout</button>
+                <button className="secondary-button" onClick={() => onSimulate("recovery_failure")}><AlertTriangle size={15} /> Simulate recovery failure</button>
+              </div>
             </section>
           </div>
+
+          <section className="panel">
+            <PanelTitle eyebrow="EVENT INGESTION" title="Webhook simulator" icon={<Network size={19} />} />
+            <p className="panel-description">Inject a payment lifecycle event and watch it appear in the audit replay.</p>
+            <div className="webhook-actions">{["payment.authorized", "payment.failed", "payment.captured", "refund.processed"].map((eventType) => <button key={eventType} className="outline-button webhook-button" onClick={() => onWebhook(eventType)}><BellRing size={14} /> {eventType}</button>)}</div>
+          </section>
 
           <section className="panel">
             <PanelTitle eyebrow="AUDIT REPLAY" title={`Timeline · ${data.payment.id}`} icon={<ActivitySquare size={19} />} />

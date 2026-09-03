@@ -233,6 +233,13 @@ export default function App() {
     }
   }
 
+  async function refreshData() {
+    await Promise.all([
+      loadAll(),
+      loadEnterprise(),
+    ]);
+  }
+
   /* =========================================================
      INITIAL LOAD
      ========================================================= */
@@ -756,9 +763,7 @@ export default function App() {
 
             <button
               className="secondary-button"
-              onClick={() =>
-                loadAll()
-              }
+              onClick={refreshData}
             >
 
               <RefreshCw size={17} />

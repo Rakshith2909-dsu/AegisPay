@@ -274,6 +274,8 @@ export default function App() {
     setSearch("");
     setStatusFilter("all");
     setRiskFilter("all");
+    setTimeMachinePayment("");
+    setTimeMachineData(null);
 
     try {
       await Promise.all([
@@ -1189,18 +1191,21 @@ function PaymentTimeMachine({
           <p>Replay a payment, test alternate risk policies and inspect failure controls.</p>
         </div>
         <div className="header-actions">
-          <select
-            value={selectedPayment}
-            onChange={(event) => onSelect(event.target.value)}
-            aria-label="Select payment for time machine"
-          >
-            <option value="">Select a payment</option>
-            {payments.map((payment) => (
-              <option key={payment.id} value={payment.id}>
-                {payment.id} · {payment.customer} · {payment.fraudScore}/100
-              </option>
-            ))}
-          </select>
+          <label className="time-machine-selector">
+            <span>Transaction to replay</span>
+            <select
+              value={selectedPayment}
+              onChange={(event) => onSelect(event.target.value)}
+              aria-label="Select payment for time machine"
+            >
+              <option value="">Select a payment</option>
+              {payments.map((payment) => (
+                <option key={payment.id} value={payment.id}>
+                  {payment.id} · {payment.customer} · Risk {payment.fraudScore}/100
+                </option>
+              ))}
+            </select>
+          </label>
           <button className="primary-button" onClick={() => onRun()} disabled={!selectedPayment || loading}>
             <Gauge size={16} />
             {loading ? "Analyzing..." : "Run analysis"}

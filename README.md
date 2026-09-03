@@ -371,6 +371,8 @@ POST /api/webhooks/simulate
 
 The simulator endpoints support `timeout` and `recovery_failure` scenarios, plus webhook events such as `payment.authorized`, `payment.failed`, `payment.captured` and `refund.processed`. Each simulation is recorded in payment history and broadcast through SSE.
 
+The Time Machine also includes Route Intelligence: it compares simulated payment routes by success rate, latency, fraud exposure and customer impact, then recommends the best reliability-risk balance for the transaction.
+
 ### Operational Data
 
 ```text

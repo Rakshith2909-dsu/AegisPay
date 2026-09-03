@@ -130,6 +130,7 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .time-machine-empty{text-align:center;padding:70px 20px;color:#667085}.time-machine-empty svg{color:#2563eb}.time-machine-empty h3{margin:14px 0 6px;color:#101828;font-family:Manrope,sans-serif}.time-machine-empty p{margin:0;font-size:12px}
 .scenario-list{display:grid;gap:10px}.scenario-item{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding:13px;border:1px solid var(--line-2);border-radius:10px;background:#fbfcfe}.scenario-item strong{font-size:12px}.scenario-item p{margin:5px 0 0;color:#667085;font-size:11px;line-height:1.4}.scenario-item .status-pill{flex:0 0 auto}
 .simulator-actions,.webhook-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}.simulator-actions .secondary-button,.webhook-button{min-height:35px;font-size:10px}.panel-description{margin:-5px 0 14px;color:#667085;font-size:11px}.webhook-button{width:auto;margin-top:0;padding:0 11px}
+.route-recommendation{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:13px;padding:14px 16px;border:1px solid #b7e3cc;border-radius:11px;background:#f2fbf5;color:#087443}.route-recommendation span,.route-recommendation small{display:block;font-size:9px}.route-recommendation strong{display:block;margin:3px 0;font-family:Manrope,sans-serif;font-size:15px;color:#075e37}.route-recommendation small{color:#4b8065}.route-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.route-card{padding:13px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe}.route-card.recommended{border-color:#8bd3aa;box-shadow:0 0 0 2px rgba(18,183,106,.08)}.route-card-title{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.route-card-title strong{font-size:11px}.route-card-title span{padding:3px 6px;border-radius:999px;background:#ecfdf3;color:#087443;font-size:8px;font-weight:800;white-space:nowrap}.route-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:15px 0 10px}.route-metrics b,.route-metrics small{display:block}.route-metrics b{font-family:Manrope,sans-serif;font-size:13px;color:#172033}.route-metrics small{margin-top:3px;color:#8a96a8;font-size:8px}.route-card p{margin:0;color:#667085;font-size:9px}
 .timeline-list{display:grid;gap:0}.timeline-item{position:relative;display:flex;gap:13px;padding:0 0 20px 4px}.timeline-item:last-child{padding-bottom:0}.timeline-item:not(:last-child):before{content:"";position:absolute;left:8px;top:16px;bottom:0;width:1px;background:#dbe4f0}.timeline-dot{z-index:1;width:9px;height:9px;flex:0 0 auto;margin-top:4px;border-radius:50%;background:#2563eb;box-shadow:0 0 0 4px #eff4ff}.timeline-item strong{font-size:12px}.timeline-item p{margin:4px 0;color:#475467;font-size:11px}.timeline-item small{color:#98a2b3;font-size:10px}
 
 /* DASHBOARD CHART */
@@ -724,6 +725,7 @@ body{
   .notice{margin-left:20px;margin-right:20px}
   .page-header{padding:20px}
   .time-machine-grid{grid-template-columns:1fr}
+  .route-grid{grid-template-columns:1fr}
 }
 @media(max-width:640px){
   .topbar{min-height:68px}

@@ -1688,6 +1688,32 @@ app.get(
         .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
       const amount = Number(payment.amount || 0);
+      const routeScenarios = [
+        {
+          route: payment.bank || "Primary Bank Route",
+          successRate: 91,
+          latencyMs: 1400,
+          fraudExposure: score >= 60 ? "Medium" : "Low",
+          customerImpact: "Balanced reliability",
+        },
+        {
+          route: "UPI Fallback Route",
+          successRate: 95,
+          latencyMs: 900,
+          fraudExposure: score >= 85 ? "High" : "Low",
+          customerImpact: "Fastest recovery",
+        },
+        {
+          route: "Bank Fallback Route",
+          successRate: 88,
+          latencyMs: 1100,
+          fraudExposure: "Low",
+          customerImpact: "Lower risk, slower completion",
+        },
+      ];
+      const recommendedRoute = routeScenarios
+        .slice()
+        .sort((left, right) => (right.successRate - right.latencyMs / 100) - (left.successRate - left.latencyMs / 100))[0];
 
       res.json({
         success: true,
@@ -1707,6 +1733,8 @@ app.get(
           },
           policyScenarios,
           failureScenarios,
+          routeScenarios,
+          recommendedRoute,
           timeline,
           sla: {
             status: payment.incidentCreated && payment.incidentStatus === "open" ? "Needs attention" : "Within control",

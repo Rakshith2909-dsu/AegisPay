@@ -1200,6 +1200,13 @@ function PaymentTimeMachine({
           </section>
 
           <section className="panel">
+            <PanelTitle eyebrow="ROUTE INTELLIGENCE" title="Recommended payment route" icon={<Network size={19} />} />
+            <p className="panel-description">Compare reliability, latency and fraud exposure before selecting a fallback route.</p>
+            <div className="route-recommendation"><div><span>Recommended route</span><strong>{data.recommendedRoute.route}</strong><small>Best reliability-risk balance for this transaction</small></div><CheckCircle2 size={22} /></div>
+            <div className="route-grid">{data.routeScenarios.map((route) => <div className={`route-card ${route.route === data.recommendedRoute.route ? "recommended" : ""}`} key={route.route}><div className="route-card-title"><strong>{route.route}</strong>{route.route === data.recommendedRoute.route && <span>Recommended</span>}</div><div className="route-metrics"><div><b>{route.successRate}%</b><small>success</small></div><div><b>{route.latencyMs}ms</b><small>latency</small></div><div><b>{route.fraudExposure}</b><small>fraud exposure</small></div></div><p>{route.customerImpact}</p></div>)}</div>
+          </section>
+
+          <section className="panel">
             <PanelTitle eyebrow="AUDIT REPLAY" title={`Timeline · ${data.payment.id}`} icon={<ActivitySquare size={19} />} />
             <div className="timeline-list">{data.timeline.length ? data.timeline.map((event, index) => <div className="timeline-item" key={`${event.action}-${event.timestamp}-${index}`}><span className="timeline-dot" /><div><strong>{event.action}</strong><p>{event.message}</p><small>{event.actor} · {formatDate(event.timestamp)}</small></div></div>) : <p className="empty-state">No recorded events for this payment.</p>}</div>
           </section>

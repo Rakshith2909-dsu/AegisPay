@@ -2707,6 +2707,8 @@ function Merchants({
           volume: 0,
           failed: 0,
           risk: 0,
+          successful: 0,
+          recovered: 0,
         };
       }
 
@@ -2738,6 +2740,14 @@ function Merchants({
         merchants[
           payment.merchant
         ].risk += 1;
+      }
+
+      if (["success", "approved", "recovered"].includes(payment.status)) {
+        merchants[payment.merchant].successful += 1;
+      }
+
+      if (payment.status === "recovered") {
+        merchants[payment.merchant].recovered += 1;
       }
     }
   );
@@ -2774,6 +2784,13 @@ function Merchants({
 
           {entries.map(
             ([merchant, data]) => (
+              (() => {
+                const reliability = data.count ? Math.round((data.successful / data.count) * 100) : 0;
+                const riskExposure = data.count ? Math.round((data.risk / data.count) * 100) : 0;
+                const trustScore = Math.max(0, Math.min(100, Math.round(reliability - riskExposure * 0.35 + Math.min(data.count, 10))));
+                const trustLevel = trustScore >= 85 ? "Trusted" : trustScore >= 65 ? "Watch" : "Review";
+
+                return (
               <div
                 className="merchant-card"
                 key={merchant}
@@ -2792,6 +2809,13 @@ function Merchants({
                     data.volume
                   )}
                 </div>
+
+                <div className="trust-passport">
+                  <div><span>Merchant Trust Passport</span><strong>{trustScore}<small>/100</small></strong></div>
+                  <b className={`trust-level ${trustLevel.toLowerCase()}`}>{trustLevel}</b>
+                </div>
+
+                <div className="trust-meter"><span style={{ width: `${trustScore}%` }} /></div>
 
                 <div className="merchant-stats">
 
@@ -2813,15 +2837,27 @@ function Merchants({
 
                   <span>
                     <strong>
-                      {data.risk}
+                      {reliability}%
                     </strong>
 
-                    High Risk
+                    Reliability
+                  </span>
+
+                  <span>
+                    <strong>{riskExposure}%</strong>
+                    Risk exposure
+                  </span>
+
+                  <span>
+                    <strong>{data.recovered}</strong>
+                    Recovered
                   </span>
 
                 </div>
 
               </div>
+                );
+              })()
             )
           )}
 

@@ -2661,20 +2661,20 @@ function Recovery({
 
                   <div>
 
-                    <strong>
+                    <strong className="recovery-id">
                       {payment.id}
                     </strong>
 
-                    <span>
+                    <span className="recovery-route">
                       {payment.customer} →{" "}
                       {payment.merchant}
                     </span>
 
-                    <small>
+                    <small className="recovery-meta-line">
                       {money(
                         payment.amount
                       )}{" "}
-                      •{" "}
+                      <span className="meta-divider">•</span>
                       {payment.bank}
                     </small>
 

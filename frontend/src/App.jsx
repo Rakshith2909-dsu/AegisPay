@@ -1218,7 +1218,7 @@ function PaymentTimeMachine({
 
       {data && (
         <>
-          <div className="stats-grid">
+          <div className="stats-grid time-machine-stats">
             <div className="stat-card"><div className="stat-icon"><ShieldAlert size={19} /></div><span>Actual risk</span><strong>{data.actual.score}/100</strong><small>{data.actual.level} · {data.actual.decision}</small></div>
             <div className="stat-card"><div className="stat-icon"><Gauge size={19} /></div><span>Selected policy</span><strong>{data.selectedDecision}</strong><small>Threshold {data.selectedThreshold}</small></div>
             <div className="stat-card"><div className="stat-icon"><ShieldCheck size={19} /></div><span>Protected amount</span><strong>{money(data.impact.protectedAmount, true)}</strong><small>{data.impact.estimatedCustomerFriction}</small></div>

@@ -138,7 +138,7 @@ export default function App() {
   /* REAL-TIME SSE STATE */
 
   const [realtimeStatus, setRealtimeStatus] =
-    useState("connecting");
+    useState("connected");
 
   const [lastRealtimeEvent, setLastRealtimeEvent] =
     useState(null);
@@ -180,7 +180,7 @@ export default function App() {
      LOAD ALL DATA
      ========================================================= */
 
-  async function loadAll(showLoading = true) {
+  async function loadAll(showLoading = true, allowStartupRetry = true) {
     try {
       if (showLoading) {
         setLoading(true);
@@ -207,12 +207,17 @@ export default function App() {
       setFraud(fraudResponse.data || null);
 
       setActivity(activityResponse.data || []);
+      setRealtimeStatus("connected");
     } catch (error) {
       console.error(error);
 
       setNotice(
         `Backend error: ${error.message}`
       );
+
+      if (allowStartupRetry) {
+        window.setTimeout(() => loadAll(false, false), 1200);
+      }
     } finally {
       setLoading(false);
     }
@@ -312,6 +317,13 @@ export default function App() {
   useEffect(() => {
     loadAll();
     loadEnterprise();
+
+    const startupRetry = window.setTimeout(() => {
+      loadAll(false, false);
+      loadEnterprise();
+    }, 1500);
+
+    return () => window.clearTimeout(startupRetry);
   }, []);
 
   /* =========================================================
@@ -342,6 +354,10 @@ export default function App() {
           "[SSE] Event received:",
           payload
         );
+
+        if (payload.type === "CONNECTED") {
+          setRealtimeStatus("connected");
+        }
 
         setLastRealtimeEvent(payload);
 
@@ -411,8 +427,15 @@ export default function App() {
       setRealtimeStatus("reconnecting");
     };
 
+    const connectionCheck = window.setTimeout(() => {
+      if (eventSource.readyState === EventSource.OPEN) {
+        setRealtimeStatus("connected");
+      }
+    }, 1000);
+
     return () => {
       console.log("[SSE] Frontend disconnected");
+      window.clearTimeout(connectionCheck);
       eventSource.close();
     };
   }, []);

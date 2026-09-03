@@ -79,6 +79,8 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .primary-button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(37,99,235,.22)}
 .secondary-button{border:1px solid #d8dee8;background:#fff;color:#344054;box-shadow:0 1px 2px rgba(16,24,40,.03)}
 .secondary-button:hover,.outline-button:hover{background:#f8fafc;border-color:#c7d0dd}
+.secondary-button:disabled{cursor:wait;opacity:.7}
+.refresh-icon.spinning{animation:refreshSpin .8s linear infinite}@keyframes refreshSpin{to{transform:rotate(360deg)}}
 .danger-button{border:1px solid #d92d20;background:#d92d20;color:#fff;box-shadow:0 5px 13px rgba(217,45,32,.12)}
 .outline-button{width:100%;border:1px solid #d8dee8;background:#fff;color:#344054;margin-top:17px}
 .delete-wide-button{width:100%;border:1px solid #fecdca;background:#fff;color:#b42318;margin-top:5px}

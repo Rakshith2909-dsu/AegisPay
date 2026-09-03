@@ -122,6 +122,7 @@ export default function App() {
   const [selectedPayment, setSelectedPayment] = useState(null);
 
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [riskFilter, setRiskFilter] = useState("all");
@@ -234,10 +235,19 @@ export default function App() {
   }
 
   async function refreshData() {
-    await Promise.all([
-      loadAll(),
-      loadEnterprise(),
-    ]);
+    if (refreshing) return;
+
+    setRefreshing(true);
+
+    try {
+      await Promise.all([
+        loadAll(),
+        loadEnterprise(),
+      ]);
+      setNotice("Dashboard data refreshed");
+    } finally {
+      setRefreshing(false);
+    }
   }
 
   /* =========================================================
@@ -764,11 +774,16 @@ export default function App() {
             <button
               className="secondary-button"
               onClick={refreshData}
+              disabled={refreshing}
+              aria-busy={refreshing}
             >
 
-              <RefreshCw size={17} />
+              <RefreshCw
+                size={17}
+                className={refreshing ? "refresh-icon spinning" : "refresh-icon"}
+              />
 
-              Refresh
+              {refreshing ? "Refreshing..." : "Refresh"}
 
             </button>
 

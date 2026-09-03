@@ -120,6 +120,9 @@ export default function App() {
   });
 
   const [selectedPayment, setSelectedPayment] = useState(null);
+  const [timeMachinePayment, setTimeMachinePayment] = useState("");
+  const [timeMachineData, setTimeMachineData] = useState(null);
+  const [timeMachineLoading, setTimeMachineLoading] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -250,6 +253,22 @@ export default function App() {
       setNotice("Dashboard data refreshed");
     } finally {
       setRefreshing(false);
+    }
+  }
+
+  async function runTimeMachine(paymentId = timeMachinePayment) {
+    if (!paymentId) return;
+
+    setTimeMachinePayment(paymentId);
+    setTimeMachineLoading(true);
+
+    try {
+      const response = await request(`/payments/${paymentId}/time-machine`);
+      setTimeMachineData(response.data || null);
+    } catch (error) {
+      setNotice(error.message);
+    } finally {
+      setTimeMachineLoading(false);
     }
   }
 
@@ -598,6 +617,10 @@ export default function App() {
       icon: ShieldAlert,
     },
     {
+      name: "Payment Time Machine",
+      icon: Gauge,
+    },
+    {
       name: "Recovery Engine",
       icon: RefreshCw,
     },
@@ -922,6 +945,17 @@ export default function App() {
             />
           )}
 
+          {page === "Payment Time Machine" && (
+            <PaymentTimeMachine
+              payments={payments}
+              selectedPayment={timeMachinePayment}
+              data={timeMachineData}
+              loading={timeMachineLoading}
+              onSelect={setTimeMachinePayment}
+              onRun={runTimeMachine}
+            />
+          )}
+
           {page === "Recovery Engine" && (
             <Recovery
               payments={
@@ -1046,6 +1080,85 @@ export default function App() {
       )}
 
     </div>
+  );
+}
+
+/* =========================================================
+   PAYMENT TIME MACHINE
+   ========================================================= */
+
+function PaymentTimeMachine({
+  payments,
+  selectedPayment,
+  data,
+  loading,
+  onSelect,
+  onRun,
+}) {
+  return (
+    <>
+      <div className="page-header">
+        <div>
+          <p className="eyebrow">COUNTERFACTUAL INTELLIGENCE</p>
+          <h2>Payment Time Machine</h2>
+          <p>Replay a payment, test alternate risk policies and inspect failure controls.</p>
+        </div>
+        <div className="header-actions">
+          <select
+            value={selectedPayment}
+            onChange={(event) => onSelect(event.target.value)}
+            aria-label="Select payment for time machine"
+          >
+            <option value="">Select a payment</option>
+            {payments.map((payment) => (
+              <option key={payment.id} value={payment.id}>
+                {payment.id} · {payment.customer} · {payment.fraudScore}/100
+              </option>
+            ))}
+          </select>
+          <button className="primary-button" onClick={() => onRun()} disabled={!selectedPayment || loading}>
+            <Gauge size={16} />
+            {loading ? "Analyzing..." : "Run analysis"}
+          </button>
+        </div>
+      </div>
+
+      {!data && (
+        <section className="panel time-machine-empty">
+          <Gauge size={28} />
+          <h3>Select a transaction to begin</h3>
+          <p>See what actually happened, what alternate policies would do and how failures are contained.</p>
+        </section>
+      )}
+
+      {data && (
+        <>
+          <div className="stats-grid">
+            <div className="stat-card"><div className="stat-icon"><ShieldAlert size={19} /></div><span>Actual risk</span><strong>{data.actual.score}/100</strong><small>{data.actual.level} · {data.actual.decision}</small></div>
+            <div className="stat-card"><div className="stat-icon"><Gauge size={19} /></div><span>Selected policy</span><strong>{data.selectedDecision}</strong><small>Threshold {data.selectedThreshold}</small></div>
+            <div className="stat-card"><div className="stat-icon"><ShieldCheck size={19} /></div><span>Protected amount</span><strong>{money(data.impact.protectedAmount, true)}</strong><small>{data.impact.estimatedCustomerFriction}</small></div>
+            <div className="stat-card"><div className="stat-icon"><ClipboardCheck size={19} /></div><span>Incident SLA</span><strong>{data.sla.status}</strong><small>{data.sla.target}</small></div>
+          </div>
+
+          <div className="time-machine-grid">
+            <section className="panel">
+              <PanelTitle eyebrow="POLICY LAB" title="Alternate decisions" icon={<Gauge size={19} />} />
+              <div className="table-wrap"><table className="data-table"><thead><tr><th>Threshold</th><th>Decision</th><th>Customer friction</th><th>Fraud exposure</th></tr></thead><tbody>{data.policyScenarios.map((scenario) => <tr key={scenario.threshold}><td>{scenario.threshold}</td><td><span className={`status-pill ${scenario.decision.toLowerCase()}`}>{scenario.decision}</span></td><td>{scenario.customerFriction}</td><td>{scenario.fraudExposure}</td></tr>)}</tbody></table></div>
+            </section>
+
+            <section className="panel">
+              <PanelTitle eyebrow="RESILIENCE LAB" title="Failure containment" icon={<ShieldCheck size={19} />} />
+              <div className="scenario-list">{data.failureScenarios.map((scenario) => <div className="scenario-item" key={scenario.name}><div><strong>{scenario.name}</strong><p>{scenario.result}</p></div><span className={`status-pill ${scenario.severity}`}>{scenario.control}</span></div>)}</div>
+            </section>
+          </div>
+
+          <section className="panel">
+            <PanelTitle eyebrow="AUDIT REPLAY" title={`Timeline · ${data.payment.id}`} icon={<ActivitySquare size={19} />} />
+            <div className="timeline-list">{data.timeline.length ? data.timeline.map((event, index) => <div className="timeline-item" key={`${event.action}-${event.timestamp}-${index}`}><span className="timeline-dot" /><div><strong>{event.action}</strong><p>{event.message}</p><small>{event.actor} · {formatDate(event.timestamp)}</small></div></div>) : <p className="empty-state">No recorded events for this payment.</p>}</div>
+          </section>
+        </>
+      )}
+    </>
   );
 }
 

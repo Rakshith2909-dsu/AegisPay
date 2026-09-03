@@ -1003,6 +1003,23 @@ app.post(
         metadata,
       } = req.body;
 
+      const idempotencyKey = req.get("Idempotency-Key")?.trim();
+
+      if (idempotencyKey) {
+        const existingPayment = await Payment.findOne({ idempotencyKey });
+
+        if (existingPayment) {
+          return res.status(200).json({
+            success: true,
+            idempotent: true,
+            message: "Existing payment returned for this idempotency key",
+            data: {
+              payment: paymentSnapshot(existingPayment),
+            },
+          });
+        }
+      }
+
       if (
         !customer ||
         !merchant ||
@@ -1194,6 +1211,7 @@ app.post(
       const payment =
         await Payment.create({
           id: createPaymentId(),
+          idempotencyKey: idempotencyKey || null,
 
           customer,
 
@@ -1609,6 +1627,84 @@ app.post(
 /* =========================================================
    PAYMENT DETAILS
 ========================================================= */
+
+app.get(
+  "/api/payments/:id/time-machine",
+  async (req, res) => {
+    try {
+      const payment = await Payment.findOne({ id: req.params.id }).lean();
+
+      if (!payment) {
+        return res.status(404).json({ success: false, message: "Payment not found" });
+      }
+
+      const score = Number(payment.fraudScore || 0);
+      const thresholds = [30, 60, 75, 85];
+      const selectedThreshold = Number(req.query.threshold || 60);
+      const decisionFor = (value) => {
+        if (score >= 85) return "BLOCK";
+        if (score >= value) return value >= 75 ? "HOLD" : "REVIEW";
+        return "APPROVE";
+      };
+
+      const policyScenarios = thresholds.map((threshold) => ({
+        threshold,
+        decision: decisionFor(threshold),
+        customerFriction: threshold <= 30 ? "High" : threshold <= 60 ? "Medium" : "Low",
+        fraudExposure: score >= threshold ? "Reduced" : "Elevated",
+      }));
+
+      const failureScenarios = [
+        { name: "Bank timeout", result: "Payment remains pending; retry safely", control: "Idempotent retry", severity: "medium" },
+        { name: "Duplicate request", result: "Return the original payment", control: "Idempotency-Key", severity: "high" },
+        { name: "Recovery failure", result: "Keep the incident open and record another attempt", control: "Audited recovery history", severity: "medium" },
+      ];
+
+      const timeline = [
+        ...(payment.history || []),
+        ...(payment.investigationHistory || []),
+      ]
+        .map((item) => ({
+          action: item.action,
+          message: item.message || item.description || "Operational event",
+          actor: item.actor || "Aegis AI",
+          timestamp: item.timestamp,
+        }))
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+      const amount = Number(payment.amount || 0);
+
+      res.json({
+        success: true,
+        data: {
+          payment: paymentSnapshot(payment),
+          actual: {
+            score,
+            level: payment.fraudLevel,
+            decision: payment.status === "blocked" ? "BLOCK" : payment.status === "held" ? "HOLD" : "APPROVE",
+          },
+          selectedThreshold,
+          selectedDecision: decisionFor(selectedThreshold),
+          impact: {
+            amountAtRisk: amount,
+            protectedAmount: score >= selectedThreshold ? amount : 0,
+            estimatedCustomerFriction: score >= selectedThreshold ? "Review required" : "Low friction",
+          },
+          policyScenarios,
+          failureScenarios,
+          timeline,
+          sla: {
+            status: payment.incidentCreated && payment.incidentStatus === "open" ? "Needs attention" : "Within control",
+            target: "24h investigation target",
+          },
+        },
+      });
+    } catch (error) {
+      console.error("GET /api/payments/:id/time-machine:", error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+);
 
 app.get(
   "/api/payments/:id",

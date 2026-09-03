@@ -40,6 +40,15 @@ This release combines payment-operations workflows with intelligence, security a
 - Administration control center
 - Responsive enterprise operations UI
 
+### Counterfactual Payment Intelligence
+
+- Payment Time Machine for transaction replay
+- Alternate fraud-policy decision scenarios
+- Failure containment scenarios for timeouts, duplicates and recovery failures
+- Protected-amount and customer-friction impact analysis
+- Incident SLA state and operational timeline replay
+- Idempotency-Key protection against duplicate payment creation
+
 ---
 
 # Why AegisPay?
@@ -353,7 +362,10 @@ POST /api/payments/:id/investigate
 POST /api/payments/:id/approve
 POST /api/payments/:id/block
 POST /api/payments/:id/recover
+GET  /api/payments/:id/time-machine
 ```
+
+`POST /api/payments` accepts an optional `Idempotency-Key` header. Reusing the same key returns the original payment instead of creating a duplicate.
 
 ### Operational Data
 

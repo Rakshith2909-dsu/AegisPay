@@ -238,6 +238,9 @@ export default function App() {
     if (refreshing) return;
 
     setRefreshing(true);
+    setSearch("");
+    setStatusFilter("all");
+    setRiskFilter("all");
 
     try {
       await Promise.all([

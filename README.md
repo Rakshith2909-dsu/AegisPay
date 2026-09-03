@@ -49,6 +49,13 @@ This release combines payment-operations workflows with intelligence, security a
 - Incident SLA state and operational timeline replay
 - Idempotency-Key protection against duplicate payment creation
 
+### Merchant Trust Intelligence
+
+- Merchant Trust Passport calculated from live ledger data
+- Transparent trust score from `0–100`
+- Reliability, risk exposure and recovery performance signals
+- Trusted, Watch and Review operating tiers
+
 ---
 
 # Why AegisPay?
@@ -526,6 +533,8 @@ Open the Vite URL, normally:
 http://localhost:5173
 ```
 
+During local development, Vite proxies `/api` requests to the backend on port `5000`, so the frontend and backend can run together without browser cross-origin issues.
+
 If the backend is hosted somewhere else, configure:
 
 ```text
@@ -601,6 +610,10 @@ Show:
 - Reports
 - System Health
 - Admin Center
+
+### 8. Demonstrate Merchant Trust Intelligence
+
+Open **Merchants** and explain how the Merchant Trust Passport turns raw payment history into an interpretable operating signal using reliability, risk exposure and recovery outcomes.
 
 ---
 

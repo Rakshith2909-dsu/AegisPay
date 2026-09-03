@@ -926,7 +926,7 @@ app.get(
 
         model:
           process.env.OPENAI_FRAUD_MODEL ||
-          "gpt-5.6-luna",
+          "gpt-4o-mini",
       },
 
       database:
@@ -1694,7 +1694,7 @@ app.get(
 
             model:
               process.env.OPENAI_FRAUD_MODEL ||
-              "gpt-5.6-luna",
+              "gpt-4o-mini",
           },
 
           queue,
@@ -2578,7 +2578,7 @@ async function startServer() {
           console.log(
             `External AI Model: ${
               process.env.OPENAI_FRAUD_MODEL ||
-              "gpt-5.6-luna"
+              "gpt-4o-mini"
             }`
           );
         }

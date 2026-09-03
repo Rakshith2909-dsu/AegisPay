@@ -462,7 +462,7 @@ async function analyzeWithOpenAI(
 
   const model =
     process.env.OPENAI_FRAUD_MODEL ||
-    "gpt-5.6-luna";
+    "gpt-4o-mini";
 
   const input = buildInput(
     transaction,

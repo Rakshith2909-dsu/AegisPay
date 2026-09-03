@@ -38,7 +38,9 @@ import {
 
 import { useEffect, useMemo, useState } from "react";
 
-const API = (import.meta.env.VITE_API_URL || "http://localhost:5000") + "/api";
+const API = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : "/api";
 
 const BANKS = [
   "HDFC Bank",
@@ -157,7 +159,23 @@ export default function App() {
      ========================================================= */
 
   async function request(endpoint, options = {}) {
-    const response = await fetch(`${API}${endpoint}`, options);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
+
+    let response;
+    try {
+      response = await fetch(`${API}${endpoint}`, {
+        ...options,
+        signal: options.signal || controller.signal,
+      });
+    } catch (error) {
+      if (error.name === "AbortError") {
+        throw new Error(`Request timed out: ${endpoint}`);
+      }
+      throw error;
+    } finally {
+      window.clearTimeout(timeout);
+    }
 
     let data = null;
     try {
